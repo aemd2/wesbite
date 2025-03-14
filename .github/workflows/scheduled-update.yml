@@ -1,0 +1,30 @@
+name: Scheduled Repository Update
+
+on:
+  schedule:
+    # Runs every 30 minutes
+    - cron: '*/30 * * * *'
+  workflow_dispatch: # Allows manual triggering
+
+jobs:
+  update-repo:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+        
+      - name: Setup timestamp
+        id: timestamp
+        run: echo "timestamp=$(date +'%Y-%m-%d %H:%M:%S')" >> $GITHUB_ENV
+        
+      - name: Update file
+        run: |
+          echo "Last updated: ${{ env.timestamp }}" > update-log.txt
+          
+      - name: Commit and push changes
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git add update-log.txt
+          git commit -m "Automated update at ${{ env.timestamp }}"
+          git push
